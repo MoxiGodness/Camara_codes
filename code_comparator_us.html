@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparador de Códigos de Barras</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      text-align: center;
+      padding: 50px;
+    }
+    h1 {
+      color: #333;
+    }
+    input {
+      font-size: 22px;
+      padding: 12px;
+      width: 320px;
+      text-align: center;
+      margin: 10px;
+    }
+    #resultado {
+      margin-top: 30px;
+      font-size: 26px;
+      font-weight: bold;
+      padding: 15px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+    .ok {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .error {
+      background-color: #e53935;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>Comparador de Códigos</h1>
+  <p>Escanea dos códigos en cualquier orden.</p>
+
+  <!-- Botón para iniciar cámara -->
+  <button onclick="iniciarEscaneo()">📷 Escanear con cámara</button>
+
+  <!-- Área donde se mostrará la cámara -->
+  <div id="reader" style="width:300px;margin:auto;margin-top:20px;"></div>
+
+  <br>
+  <input type="text" id="codigoInput" placeholder="O escanea aquí con un lector USB..." autofocus autocomplete="off">
+
+  <div id="resultado"></div>
+
+  <!-- Librería lector -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <script>
+    let codigo1 = "";
+    let codigo2 = "";
+    let buffer = "";
+    let timeout;
+
+    const input = document.getElementById("codigoInput");
+    const result = document.getElementById("resultado");
+
+    function comparar() {
+      if (codigo1 && codigo2) {
+        if (codigo1 === codigo2) {
+          result.textContent = "✅ Los códigos son iguales (" + codigo1 + ")";
+          result.className = "ok";
+        } else {
+          result.textContent = "❌ Los códigos son diferentes (" + codigo1 + " ≠ " + codigo2 + ")";
+          result.className = "error";
+        }
+
+        setTimeout(() => {
+          codigo1 = "";
+          codigo2 = "";
+          result.textContent = "Escanea el siguiente par...";
+          result.className = "";
+        }, 2000);
+      }
+    }
+
+    function procesarCodigo(value) {
+      value = value.trim();
+      if (!codigo1) codigo1 = value;
+      else if (!codigo2) codigo2 = value;
+      comparar();
+    }
+
+    function iniciarEscaneo() {
+      const html5QrCode = new Html5Qrcode("reader");
+
+      Html5Qrcode.getCameras().then(cameras => {
+        html5QrCode.start(
+          cameras[0].id,
+          { fps: 10, qrbox: 250 },
+          (decodedText) => {
+            procesarCodigo(decodedText);
+          }
+        );
+      });
+    }
+
+    input.addEventListener("input", (e) => {
+      clearTimeout(timeout);
+      buffer += e.data || "";
+
+      timeout = setTimeout(() => {
+        if (buffer.length > 0) {
+          procesarCodigo(buffer);
+          buffer = "";
+          input.value = "";
+        }
+      }, 150);
+    });
+
+    window.addEventListener("click", () => input.focus());
+  </script>
+</body>
+
+</html>
