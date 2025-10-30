@@ -93,16 +93,24 @@
 
     function iniciarEscaneo() {
       const html5QrCode = new Html5Qrcode("reader");
-
       Html5Qrcode.getCameras().then(cameras => {
+        let cameraId = cameras[0].id; // default
+        // Buscar cámara trasera
+        for(let cam of cameras){
+            if(cam.label.toLowerCase().includes("back") || cam.label.toLowerCase().includes("rear")){
+                cameraId = cam.id;
+                break;
+            }
+        }
         html5QrCode.start(
-          cameras[0].id,
-          { fps: 10, qrbox: 250 },
-          (decodedText) => {
-            procesarCodigo(decodedText);
-          }
+            cameraId,
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                procesarCodigo(decodedText);
+            }
         );
       });
+
     }
 
     input.addEventListener("input", (e) => {
