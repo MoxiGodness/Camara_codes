@@ -115,16 +115,17 @@
 
     input.addEventListener("input", (e) => {
       clearTimeout(timeout);
-      buffer += e.data || "";
+      buffer += input.value; // toma todo el valor actual del input
 
       timeout = setTimeout(() => {
-        if (buffer.length > 0) {
-          procesarCodigo(buffer);
-          buffer = "";
-          input.value = "";
-        }
+          if (buffer.length > 0) {
+              procesarCodigo(buffer);
+              buffer = "";
+              input.value = "";
+          }
       }, 150);
     });
+
 
     window.addEventListener("click", () => input.focus());
   </script>
